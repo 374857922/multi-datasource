@@ -18,27 +18,27 @@ import com.asiainfo.multidatasource.datasource.DataSource;
 import com.asiainfo.multidatasource.datasource.DataSourceHolder;
 
 /**
+ * @author zq
  * @Description: TODO
- * 
- * @author       zq
- * @date         2017年5月7日  下午3:24:27
+ * @date 2017年5月7日  下午3:24:27
  * Copyright: 	  北京亚信智慧数据科技有限公司
  */
-@Component
-@Aspect
+//@Component
+//@Aspect
 @Order(1)
 public class DataSourceAspect {
 
-	private static final Logger logger = LoggerFactory.getLogger(DataSourceAspect.class);
-	
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceAspect.class);
+
     @Pointcut("execution(* com.asiainfo.multidatasource..service..*.*(..))")
-    public void aspect() {}
-    
-	@Before("aspect()")
-	public void before(JoinPoint point) {
-		
-		logger.info("before {}", point);
-		
+    public void aspect() {
+    }
+
+    @Before("aspect()")
+    public void before(JoinPoint point) {
+
+        logger.info("before {}", point);
+
         MethodSignature proxySignature = (MethodSignature) point.getSignature();
         Method proxyMethod = proxySignature.getMethod();
         Class<?> target = point.getTarget().getClass();
@@ -52,26 +52,26 @@ public class DataSourceAspect {
         if (targetMethod != null) {
             Transactional transactional = target.getAnnotation(Transactional.class);
             if (transactional != null) {
-            	DataSource clazzDatasource = target.getAnnotation(DataSource.class);
-            	DataSource methodDatasource = targetMethod.getAnnotation(DataSource.class);
+                DataSource clazzDatasource = target.getAnnotation(DataSource.class);
+                DataSource methodDatasource = targetMethod.getAnnotation(DataSource.class);
                 if (methodDatasource != null) {
-                	logger.debug("using specify method datasource({}) ......", methodDatasource.value());
+                    logger.debug("using specify method datasource({}) ......", methodDatasource.value());
                     DataSourceHolder.setDataSource(methodDatasource.value());
                 } else if (clazzDatasource != null) {
-                	logger.debug("using specify clazz datasource({}) ......", clazzDatasource.value());
+                    logger.debug("using specify clazz datasource({}) ......", clazzDatasource.value());
                     DataSourceHolder.setDataSource(clazzDatasource.value());
                 } else {
                     logger.warn("does not specify any datasource, using default datasource ......");
                 }
             } else {
-            	logger.debug("non transactional method, using default datasource({}) ......");
+                logger.debug("non transactional method, using default datasource({}) ......");
             }
         }
-	}
+    }
 
-	@AfterReturning("aspect()")
-	public void afterReturn(JoinPoint joinPoint) {
-		logger.info("afterReturn {}", joinPoint);
-		DataSourceHolder.clear();
-	}
+    @AfterReturning("aspect()")
+    public void afterReturn(JoinPoint joinPoint) {
+        logger.info("afterReturn {}", joinPoint);
+        DataSourceHolder.clear();
+    }
 }
